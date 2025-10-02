@@ -1,0 +1,35 @@
+# Node / JS
+**/node_modules/
+**/dist/
+**/build/
+**/.next/
+**/.turbo/
+**/coverage/
+**/.cache/
+**/.parcel-cache/
+**/tmp/
+
+# Expo / RN
+**/.expo/
+**/.expo-shared/
+**/android/.gradle/
+**/android/build/
+**/android/app/build/
+**/android/local.properties
+**/ios/build/
+**/ios/Pods/
+**/ios/*.xcodeproj/xcuserdata/
+**/ios/*.xcworkspace/xcuserdata/
+
+# Env / secrets
+**/.env
+**/.env.*
+!**/.env.example
+**/*.keystore
+**/*.jks
+**/google-services.json
+**/GoogleService-Info.plist
+
+# OS cruft
+.DS_Store
+Thumbs.db

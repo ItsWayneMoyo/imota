@@ -1,0 +1,280 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String        @id @default(cuid())
+  email     String        @unique
+  phone     String?
+  name      String?
+  provider  String?
+  createdAt DateTime      @default(now())
+  rides     Ride[]
+  Driver    Driver?
+  devices   DeviceToken[] @relation("UserDeviceTokens")
+}
+
+model Driver {
+  id             String          @id @default(cuid())
+  userId         String          @unique
+  status         String          @default("APPROVED")
+  carMake        String?
+  carModel       String?
+  carYear        Int?
+  createdAt      DateTime        @default(now())
+  user           User            @relation(fields: [userId], references: [id])
+  driverLocation DriverLocation?
+  rides          Ride[]
+  RideOffer      RideOffer[]
+}
+
+model DriverLocation {
+  driverId  String   @id
+  lat       Float
+  lng       Float
+  heading   Float?
+  speedKph  Float?
+  updatedAt DateTime @updatedAt
+  driver    Driver   @relation(fields: [driverId], references: [id])
+}
+
+model Ride {
+  id            String          @id @default(cuid())
+  riderId       String
+  driverId      String?
+  status        String
+  pickupLat     Float
+  pickupLng     Float
+  dropoffLat    Float
+  dropoffLng    Float
+  startedAt     DateTime?
+  completedAt   DateTime?
+  distanceKm    Float?
+  durationMin   Float?
+  createdAt     DateTime        @default(now())
+  rider         User            @relation(fields: [riderId], references: [id])
+  driver        Driver?         @relation(fields: [driverId], references: [id])
+  events        RideEvent[]
+  payment       Payment?
+  RideRating    RideRating?
+  PaymentIntent PaymentIntent[]
+  RideOffer     RideOffer[]
+}
+
+model RideEvent {
+  id        String   @id @default(cuid())
+  rideId    String
+  type      String
+  payload   Json?
+  createdAt DateTime @default(now())
+  ride      Ride     @relation(fields: [rideId], references: [id])
+}
+
+model Session {
+  id        String   @id
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RideRating {
+  rideId  String  @id
+  stars   Int
+  comment String?
+  ride    Ride    @relation(fields: [rideId], references: [id])
+}
+
+model Payment {
+  rideId    String   @id
+  provider  String
+  amount    Int
+  status    String
+  currency  String   @default("USD")
+  createdAt DateTime @default(now()) // <-- must exist
+  ride      Ride     @relation(fields: [rideId], references: [id])
+}
+
+model PaymentIntent {
+  id          String         @id @default(cuid())
+  rideId      String
+  method      String
+  amount      Int
+  currency    String         @default("USD")
+  status      String         @default("PENDING")
+  provider    String
+  providerRef String?
+  checkoutUrl String?
+  pollUrl     String?
+  phone       String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  ride        Ride           @relation(fields: [rideId], references: [id])
+  events      PaymentEvent[]
+  Refund      Refund[]
+}
+
+model PaymentEvent {
+  id        String        @id @default(cuid())
+  intentId  String
+  type      String
+  payload   Json?
+  createdAt DateTime      @default(now())
+  intent    PaymentIntent @relation(fields: [intentId], references: [id])
+}
+
+model Payout {
+  id          String    @id @default(cuid())
+  driverId    String
+  amount      Int
+  currency    String    @default("USD")
+  status      String    @default("REQUESTED")
+  initiatedAt DateTime  @default(now())
+  approvedAt  DateTime?
+  settledAt   DateTime?
+  providerRef String?
+}
+
+model PayoutAccount {
+  id       String  @id @default(cuid())
+  driverId String
+  type     String
+  details  Json
+  verified Boolean @default(false)
+}
+
+model RideOffer {
+  id         String      @id @default(cuid())
+  rideId     String
+  driverId   String
+  status     OfferStatus @default(PENDING)
+  distanceKm Float
+  createdAt  DateTime    @default(now())
+  expiresAt  DateTime
+  ride       Ride        @relation(fields: [rideId], references: [id])
+  driver     Driver      @relation(fields: [driverId], references: [id])
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
+model DispatchConfig {
+  id          String   @id @default(cuid())
+  radiusStart Float    @default(3)
+  radiusStep  Float    @default(3)
+  maxRadius   Float    @default(15)
+  batchSize   Int      @default(5)
+  offerTtlSec Int      @default(15)
+  active      Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+}
+
+model PricingVersion {
+  id      String   @id @default(cuid())
+  name    String
+  base    Int
+  perKm   Int
+  perMin  Int
+  minimum Int
+  surge   Float    @default(1.0)
+  startAt DateTime @default(now())
+  active  Boolean  @default(true)
+}
+
+model Broadcast {
+  id        String   @id @default(cuid())
+  channel   String
+  segment   String
+  title     String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation("UserDeviceTokens", fields: [userId], references: [id]) // ✅ match the name
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model WebhookLog {
+  id        String   @id @default(cuid())
+  provider  String
+  event     String
+  headers   Json
+  payload   Json
+  createdAt DateTime @default(now())
+}
+
+model NotificationLog {
+  id        String   @id @default(cuid())
+  channel   String
+  target    String
+  provider  String?
+  status    String
+  error     String?
+  queue     String
+  jobId     String?
+  attempts  Int      @default(0)
+  payload   Json?
+  createdAt DateTime @default(now())
+}
+
+model Refund {
+  id          String        @id @default(cuid())
+  intentId    String
+  amount      Int
+  currency    String        @default("USD")
+  status      String        @default("PENDING") // PENDING | SUCCEEDED | FAILED | CANCELLED
+  reason      String?
+  provider    String
+  providerRef String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  intent      PaymentIntent @relation(fields: [intentId], references: [id])
+  events      RefundEvent[]
+}
+
+model RefundEvent {
+  id        String   @id @default(cuid())
+  refundId  String
+  type      String
+  payload   Json?
+  createdAt DateTime @default(now())
+  refund    Refund   @relation(fields: [refundId], references: [id])
+}
+
+model ReconciliationRun {
+  id        String              @id @default(cuid())
+  provider  String
+  createdAt DateTime            @default(now())
+  rows      ReconciliationRow[]
+}
+
+model ReconciliationRow {
+  id          String            @id @default(cuid())
+  runId       String
+  providerRef String
+  amount      Int
+  currency    String            @default("USD")
+  status      String
+  matched     Boolean           @default(false)
+  rideId      String?
+  intentId    String?
+  note        String?
+  run         ReconciliationRun @relation(fields: [runId], references: [id])
+}
