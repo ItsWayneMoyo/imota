@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 type WaState = { step: 'welcome'|'pickup'|'dropoff'|'confirm'|'collect_phone', pickup?: string, dropoff?: string, phone?: string }
 
@@ -105,3 +105,4 @@ export class WhatsAppService {
   }
   // 👆👆 END NORMALIZER 👆👆
 }
+

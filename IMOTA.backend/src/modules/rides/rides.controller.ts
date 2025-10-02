@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, Req, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { calcFareCents } from '../../common/pricing.util';
 import { RideNotifierService } from './ride-notifier.service';
 import { RouteService } from '../route/route.service';
@@ -164,3 +164,4 @@ export class RidesController {
     return { ok: true };
   }   // closes rate method
   }     // closes RidesController class
+

@@ -1,6 +1,6 @@
 
 import { Body, Controller, Get, HttpCode, HttpException, HttpStatus, Post, Query } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { StateService } from './state.service';
 import { GeocodeService } from '../geocode/geocode.service';
 import { haversineKm } from '../../common/geo.util';
@@ -92,3 +92,4 @@ export class WhatsAppController {
     await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type':'application/json' }, body: JSON.stringify({ messaging_product:'whatsapp', to: msisdn, text:{ body: text } }) });
   }
 }
+

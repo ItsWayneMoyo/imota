@@ -36,6 +36,7 @@
   "devDependencies": {
     "@nestjs/cli": "^11.0.10",
     "@types/cookie-parser": "^1.4.9",
+    "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.6.1",
     "@types/socket.io-client": "^1.4.36",

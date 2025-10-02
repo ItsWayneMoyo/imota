@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { AdminKeyGuard } from '../../common/admin-key.guard';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { PaymentsService } from '../payments/payments.service';
 import { Roles, RolesGuard } from '../../common/roles';
 
@@ -61,3 +61,4 @@ export class AdminPaymentsController {
   }
 
 }
+

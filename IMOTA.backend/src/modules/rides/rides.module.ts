@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { RidesController } from './rides.controller';
 import { RideNotifierService } from './ride-notifier.service';
 import { NotificationsModule } from '../notifications/notifications.module';
@@ -20,3 +20,4 @@ import { RouteModule } from '../route/route.module';
   ]
 })
 export class RidesModule {}
+

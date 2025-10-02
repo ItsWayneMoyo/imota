@@ -1,5 +1,5 @@
 import { Body, Controller, Post, Req } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 class RegisterDeviceDto {
   token!: string;
@@ -22,3 +22,4 @@ export class DevicesController {
     });
   }
 }
+

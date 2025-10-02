@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Query, UseGuards, BadRequestException } from '@nestjs/common';
 import { AdminKeyGuard } from '../../common/admin-key.guard';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { listDLQ, retryDLQ, purgeDLQ, queueStats } from '../notifications/queues';
 
 type QueueName = 'push' | 'sms' | 'email';
@@ -111,3 +111,4 @@ export class AdminNotificationsController {
     return purgeDLQ(queue, jobId);
   }
 }
+

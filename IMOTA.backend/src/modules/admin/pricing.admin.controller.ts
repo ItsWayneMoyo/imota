@@ -1,22 +1,32 @@
+// src/modules/admin/pricing.admin.controller.ts
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { AdminKeyGuard } from '../../common/admin-key.guard';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service'; // ✅ correct path
 import { Roles, RolesGuard } from '../../common/roles';
-
-class CreatePricingDto { name!:string; base!:number; perKm!:number; perMin!:number; minimum!:number; surge?:number; startAt?:string }
-class UpdatePricingDto extends CreatePricingDto { active?: boolean }
-class SurgeDto { surge!: number }
+import { CreatePricingDto, UpdatePricingDto, SurgeDto } from './dto/pricing.dto';
 
 @UseGuards(AdminKeyGuard, RolesGuard)
 @Controller('admin/pricing')
 export class AdminPricingController {
   constructor(private prisma: PrismaService) {}
 
-  @Get('versions') @Roles('superadmin')
+  // Reads: allow viewer or superadmin
+  @Get('versions') @Roles('viewer', 'superadmin')
   async versions() {
     return this.prisma.pricingVersion.findMany({ orderBy: { startAt: 'desc' } });
   }
 
+  @Get('active') @Roles('viewer', 'superadmin')
+  async active() {
+    const v = await this.prisma.pricingVersion.findFirst({
+      where: { active: true },
+      orderBy: { startAt: 'desc' },
+    });
+    // Always return an object so the client can safely JSON.parse + unwrap
+    return { active: v ?? null };
+  }
+
+  // Writes: superadmin only
   @Post('versions') @Roles('superadmin')
   async create(@Body() dto: CreatePricingDto) {
     return this.prisma.pricingVersion.create({
@@ -28,8 +38,8 @@ export class AdminPricingController {
         minimum: dto.minimum,
         surge: dto.surge ?? 1.0,
         startAt: dto.startAt ? new Date(dto.startAt) : new Date(),
-        active: false
-      } as any
+        active: false,
+      },
     });
   }
 
@@ -37,7 +47,16 @@ export class AdminPricingController {
   async update(@Param('id') id: string, @Body() dto: UpdatePricingDto) {
     return this.prisma.pricingVersion.update({
       where: { id },
-      data: { ...dto, startAt: dto.startAt ? new Date(dto.startAt) : undefined } as any
+      data: {
+        ...(dto.name != null ? { name: dto.name } : {}),
+        ...(dto.base != null ? { base: dto.base } : {}),
+        ...(dto.perKm != null ? { perKm: dto.perKm } : {}),
+        ...(dto.perMin != null ? { perMin: dto.perMin } : {}),
+        ...(dto.minimum != null ? { minimum: dto.minimum } : {}),
+        ...(dto.surge != null ? { surge: dto.surge } : {}),
+        ...(dto.startAt ? { startAt: new Date(dto.startAt) } : {}),
+        ...(dto.active != null ? { active: dto.active } : {}),
+      },
     });
   }
 
@@ -49,19 +68,25 @@ export class AdminPricingController {
 
   @Delete('versions/:id') @Roles('superadmin')
   async remove(@Param('id') id: string) {
-    return this.prisma.pricingVersion.delete({ where: { id } });
+    const v = await this.prisma.pricingVersion.findUnique({ where: { id } });
+    if (!v) return { ok: true };
+    if (v.active) return { ok: false, error: 'Cannot delete the active version' };
+    await this.prisma.pricingVersion.delete({ where: { id } });
+    return { ok: true };
   }
 
-  // Surge quick switch (applies to the currently active version)
+  // Surge quick switch (applies to the active version)
   @Post('surge') @Roles('superadmin')
   async setSurge(@Body() dto: SurgeDto) {
-    const active = await this.prisma.pricingVersion.findFirst({ where: { active: true }, orderBy: { startAt: 'desc' } });
-    if (!active) throw new Error('No active pricing version');
-    return this.prisma.pricingVersion.update({ where: { id: active.id }, data: { surge: dto.surge } });
-  }
-
-  @Get('active') @Roles('superadmin')
-  async active() {
-    return this.prisma.pricingVersion.findFirst({ where: { active: true }, orderBy: { startAt: 'desc' } });
+    const active = await this.prisma.pricingVersion.findFirst({
+      where: { active: true },
+      orderBy: { startAt: 'desc' },
+    });
+    if (!active) return { ok: false, error: 'No active pricing version' };
+    const v = await this.prisma.pricingVersion.update({
+      where: { id: active.id },
+      data: { surge: dto.surge },
+    });
+    return { ok: true, version: v };
   }
 }

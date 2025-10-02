@@ -1,6 +1,6 @@
 
 import { Body, Controller, Post, Req, UseGuards, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { RideNotifierService } from '../rides/ride-notifier.service';
 
 class ActDto { offerId!: string }
@@ -39,3 +39,4 @@ export class DriverDispatchController {
     return { ok: true };
   }
 }
+

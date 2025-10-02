@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AdminRoles } from '../../guards/admin.guard';
 
 @Controller('admin/pricing')
 export class PricingController {
@@ -15,6 +16,7 @@ export class PricingController {
 
   // Create version
   @Post('versions')
+  @AdminRoles('superadmin')
   async createVersion(
     @Body()
     body: {
@@ -44,6 +46,7 @@ export class PricingController {
 
   // Update version
   @Put('versions/:id')
+  @AdminRoles('superadmin')
   async updateVersion(
     @Param('id') id: string,
     @Body()
@@ -70,6 +73,7 @@ export class PricingController {
 
   // Delete version (block deleting active)
   @Delete('versions/:id')
+  @AdminRoles('superadmin')
   async deleteVersion(@Param('id') id: string) {
     const v = await this.prisma.pricingVersion.findUnique({ where: { id } });
     if (!v) return { ok: true }; // already gone
@@ -82,6 +86,7 @@ export class PricingController {
 
   // Activate a version
   @Post('versions/:id/activate')
+  @AdminRoles('superadmin')
   async activate(@Param('id') id: string) {
     await this.prisma.pricingVersion.updateMany({ data: { active: false }, where: { active: true } });
     const v = await this.prisma.pricingVersion.update({ where: { id }, data: { active: true } });
@@ -101,6 +106,7 @@ export class PricingController {
 
   // Update surge (on active version)
   @Post('surge')
+  @AdminRoles('superadmin')
   async setSurge(@Body() body: { surge: number }) {
     const active = await this.prisma.pricingVersion.findFirst({ where: { active: true } });
     if (!active) return { ok: false, error: 'No active pricing version' };

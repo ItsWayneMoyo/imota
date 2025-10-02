@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class PaymentsService {
@@ -13,3 +13,4 @@ export class PaymentsService {
   async exportCSV(range?: any) { return 'id,amount,status\n'; }
   async reconcile() { return { ok: true }; }
 }
+

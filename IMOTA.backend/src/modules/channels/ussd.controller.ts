@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { StateService } from './state.service';
 import { GeocodeService } from '../geocode/geocode.service';
 import { haversineKm } from '../../common/geo.util';
@@ -112,3 +112,4 @@ export class UssdController {
     return user;
   }
 }
+

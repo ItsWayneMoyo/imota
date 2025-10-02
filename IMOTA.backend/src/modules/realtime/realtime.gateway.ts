@@ -2,7 +2,7 @@
 import { OnModuleInit } from '@nestjs/common';
 import { WebSocketGateway, SubscribeMessage, ConnectedSocket, MessageBody, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { haversineKm } from '../../common/geo.util';
 
@@ -54,3 +54,4 @@ export class RealtimeGateway implements OnModuleInit {
   emitRideStatus(rideId:string, status:string, extra?:any) { this.server.to(`ride:${rideId}`).emit('ride:status', { status, ...(extra||{}) }); }
   notifyUser(userId:string, event:string, payload:any) { this.server.to(`user:${userId}`).emit(event, payload); }
 }
+

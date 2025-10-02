@@ -1,6 +1,6 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { AdminKeyGuard } from '../../common/admin-key.guard';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @UseGuards(AdminKeyGuard)
 @Controller('admin/dashboard')
@@ -222,3 +222,4 @@ export class AdminDashboardController {
     return { rides: out };
   }
 }
+

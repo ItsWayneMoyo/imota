@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { pushQueue, smsQueue, emailQueue } from './queues';
 
 type Channel = 'PUSH' | 'SMS' | 'EMAIL';
@@ -123,3 +123,4 @@ export class NotificationsService {
     }
   }
 }
+

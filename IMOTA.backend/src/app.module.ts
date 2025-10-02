@@ -1,5 +1,8 @@
 // src/app.module.ts
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';          // ← you don’t need Reflector here
+import { JwtModule } from '@nestjs/jwt';
+import { AdminGuard } from './guards/admin.guard';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { RidesModule } from './modules/rides/rides.module';
@@ -11,16 +14,13 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { AdminModule } from './modules/admin/admin.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { DevicesModule } from './modules/devices/devices.module';
-
-// ✅ add these if you have the files
-//import { ExportsModule } from './modules/exports/exports.module';
-//import { KycModule } from './modules/kyc/kyc.module';
-//import { PayoutsModule } from './modules/payouts/payouts.module';
-
 import { PricingModule } from './modules/pricing/pricing.module';
 
 @Module({
   imports: [
+    // Make JwtService available to the guard
+    JwtModule.register({ global: true, secret: process.env.JWT_SECRET || 'change-me' }),
+
     AuthModule,
     RidesModule,
     DispatchModule,
@@ -32,9 +32,14 @@ import { PricingModule } from './modules/pricing/pricing.module';
     PaymentsModule,
     DevicesModule,
     PricingModule,
-    //ExportsModule,   // ✅
-    //KycModule,       // ✅
-    //PayoutsModule,   // ✅
+
+    // (Uncomment later when those modules exist)
+    // ExportsModule,
+    // KycModule,
+    // PayoutsModule,
+  ],
+  providers: [
+    { provide: APP_GUARD, useClass: AdminGuard },   // Guard only enforces on /admin/* paths
   ],
 })
 export class AppModule {}

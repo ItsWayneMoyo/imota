@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Controller('device-tokens')
 export class DeviceTokensController {
@@ -15,3 +15,4 @@ export class DeviceTokensController {
     });
   }
 }
+

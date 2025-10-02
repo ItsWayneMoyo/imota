@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { IsIn, IsOptional, IsString } from 'class-validator';
 import { AdminKeyGuard } from '../../common/admin-key.guard';
-import { PrismaService } from '../../prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { Roles, RolesGuard } from '../../common/roles';
 
@@ -92,3 +92,4 @@ export class AdminBroadcastsController {
     return { saved, ok: true, result };
   }
 }
+
